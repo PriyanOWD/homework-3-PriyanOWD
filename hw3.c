@@ -85,7 +85,6 @@ int argCommands(char*** uInput, int currI, int arrSize, int tokCount)
 			++i;
 	}
 	i++;
-	//printf("\ni = %d\n", i);
 	return i;
 }
 
@@ -106,29 +105,36 @@ int main(int argc, char **argv)
 	
 	printf(" 361 > ");
 	tokens = inputParser(&userInput, uiSize);
-	//printf("tok = %d ", tokens);
+	printf("tok = %d ", tokens);
 
 	int i = 0;
 	int cmd = 0;
 	while(strcmp(userInput[i],"exit") != 0)
 	{
 		cmd = i;
+		printf(" BEFORE cmd = %d i = %d      ", cmd, i);
 		i = argCommands(&userInput, i, uiSize, tokens);
+		printf(" AFTER cmd = %d i = %d\n", cmd, i);
 		cPID = fork();
 		if( cPID == 0)
 		{
-			if(cmd + 1 == i)
+			if(cmd == 0)
 			{
 				execv(userInput[cmd], userInput);
 			}
 			else
-			{	
-				execv(userInput[cmd], userInput);
+			{
+				execv(userInput[cmd], userInput + cmd);
+			}	
+			if(i >= tokens)
+			{			
+				printf(" CHILD EXIT");
+				exit(6);
 			}
-			exit(6);
 		}
 		else
 		{
+			printf(" IN ELSE");
 			int status;
 			wait(&status);
 			printf("pid:%d status:%d\n", cPID, status);
@@ -137,12 +143,12 @@ int main(int argc, char **argv)
 		
 			if(i >= tokens)
 			{			
-
+				printf(" IN i>=tokens");
 				clearUserInput(&userInput, uiSize);
 				initUserInput(&userInput, uiSize);
 				printf("361 > ");
 				tokens = inputParser(&userInput, uiSize);
-				//printf("tok = %d ", tokens);
+				printf("tok = %d ", tokens);
 				i = 0;
 			}
 		}
